@@ -1,514 +1,456 @@
 #include<stdio.h>
 #include<string.h>
-#include<stdlib.h>
+#include<stdlib.h> // Including needed libraries
 #include<time.h>
 #include<stdbool.h>
 
-//Struct to store the information of the player
-typedef struct
+typedef struct // To store the infor of the players entered
 {
     char name[20];
     char type[20];
     int lifePoints;
-    int smartness,strength, magicSkills, luck,dexterity;
-    
+    int smartness,strength, magicSkills, luck, dexterity;
 }
 
-player;
+play;
 
-//struct to store the information of the slot
-typedef struct
+typedef struct // To store the info of the slots
 {
     char slotType[20];
     int slotTypeNo;
-    int playerNo;
+    int playNo;
 }
 
 slot;
 
-//array to store the player types
-char playerTypes[4][20]={"Elf","Human","Ogre","Wizard"};
-
-//array to store the slot types
-char slotType[3][20]={"Level Ground","Hill","City"};
-
-//method to set the capabilities of a player
-void setCapabilities(player playerArray[],int playerNumber,int playerTypeChoice);
-
-//method to update the capabilities of the player on moving to next slot
-void updateCapabiltitesOnMovingSlot(player playerArray[],int playerNumber,int slotTypeMovedTo);
-
-//method to print the details after a successful turn
-void printDetails(player playerArray[],int noOfPlayers);
-
-//method to find the closest player to attack
-int findClosestPlayer(int attackerPlayerNo,slot slotArray[], int noOfSlots);
-
-//method to implement the attack
-void implementingAttack(player playerArray[],int attackerPlayerNo,int attackedPlayerNo);
-
-//method to perform the actions
-void performActions(player playerArray[],slot slotArray[],int noOfPlayers,int noOfSlots);
+char playTypes[4][20]={"Elf","Human","Ogre","Wizard"}; // For the play types
 
 
-int main()
+char slotType[3][20]={"Level Ground","Hill","City"}; // For the slot types
+
+
+void to_set_Capabilities(play PlayerArray[],int playNumber,int playTypeChoice); // For capabilities of a play
+
+void updateCapabiltitesOnMovingSlot(play PlayerArray[],int playNumber,int slotTypeMovedTo); // To update the capabilities of the play on moving to next slot
+
+void Printing_Final(play PlayerArray[],int noOfplays); // For printing the details after a successful turn
+
+int findClosestplay(int attackerplayNo,slot slotArr[], int noOfSlots); // For finding the closest play to attack
+
+void Attacking(play PlayerArray[],int attackerplayNo,int attackedplayNo); //For implementing the attack
+
+void Gamestarting(play PlayerArray[],slot slotArr[],int noOfplays,int noOfSlots); // To perform the actions
+
+
+int main() // Main void
 {
-    int noOfPlayers;
+    int noOfplays;
     
-    printf("Enter the number of players: ");
-    scanf("%d",&noOfPlayers);
+    printf("Enter the number of players: "); // To get the number of players
+    scanf("%d",&noOfplays);
     
-    while(!(noOfPlayers>=2 && noOfPlayers<=6))
+    while(!(noOfplays>=2 && noOfplays<=6)) // Checking if the number of players are between min and max value allowed
     {
         printf("Minimum number of players is 2 and Maximum number of players is 6\nPlease re-enter your choice: ");
-        scanf("%d",&noOfPlayers);
+        scanf("%d",&noOfplays);
     }
     
-    //make a player array to store the player information
-    player playerArray[noOfPlayers];
+    play PlayerArray[noOfplays]; // Making a play array
     
-    //loop to store the player information
-    for(int a=0;a<noOfPlayers;a++)
+    for(int a=0;a<noOfplays;a++)// Loop to store the play information
     {
-        //input the player name
-        printf("Please enter the name of Player %d: ",(a+1));
-        scanf("%s",playerArray[a].name);
+        printf("Please enter the name of players %d: ",(a+1));
+        scanf("%s",PlayerArray[a].name);
         
-        //input the player type
-        printf("Please enter the type of Player %d\n",(a+1));
+        printf("Please enter the type of players %d\n",(a+1));
+        
         printf("Enter 1 for Elf\nEnter 2 for Human\nEnter 3 for Orge\nEnter 4 for Wizard: ");
-        int playerTypeChoice=0;
-        scanf("%d",&playerTypeChoice);
         
-        //loop to check if input is correct
-        //if not again asks for input
-        while(!(playerTypeChoice>=1 && playerTypeChoice<=4))
+        int playTypeChoice=0;
+        scanf("%d",&playTypeChoice); // Taking choice from user
+        
+        while(!(playTypeChoice>=1 && playTypeChoice<=4)) // Checking if valid input
         {
             printf("Wrong Choice Entered\nRe-enter your choice: ");
-            scanf("%d",&playerTypeChoice);
+            scanf("%d",&playTypeChoice);
             
         }
         
-        //this works
+        strcpy(PlayerArray[a].type,playTypes[playTypeChoice-1]); // Using strcpy to copy the string
         
-        strcpy(playerArray[a].type,playerTypes[playerTypeChoice-1]);
-        
-        //calling the method to set the capability of the player
-        setCapabilities(playerArray, a,playerTypeChoice);
+        to_set_Capabilities(PlayerArray, a,playTypeChoice); // Calling function to set capability of players
     }
     
-    
-    //input the number of slots
-    printf("Please Enter the number of slots (Maximum is 20):");
     int noOfSlots;
+    
+    printf("Please Enter the number of slots (Maximum is 20):"); // Number of slots
     scanf("%d",&noOfSlots);
     
-    //checks if number of slots is within range
-    //if not takes another input
-    while(!(noOfSlots>noOfPlayers && noOfSlots<=20))
+    while(!(noOfSlots>noOfplays && noOfSlots<=20)) // Checking if valid input or not
     {
         printf("Number of slots selected is out of bound\nRe-enter the number of slots: ");
         scanf("%d",&noOfSlots);
     }
     
-    //creates slot array to store information about the slots
     slot slotsArray[noOfSlots];
     
-    //initialising the slot
-    //initialising the slotTypeNo and PlayerNo to -1
-    for(int a=0;a<noOfSlots;a++)
+    for(int a=0;a<noOfSlots;a++) //initialising the slotTypeNo and playNo to -1
     {
         slotsArray[a].slotTypeNo=-1;
-        slotsArray[a].playerNo=-1;
+        slotsArray[a].playNo=-1;
     }
-    srand((unsigned int)time(NULL));
     
+    srand((unsigned int)time(NULL)); // Using rand to produce rand values
     
-    //stores the slotType
-    for(int a=0;a<noOfSlots;a++)
+
+    for(int a=0;a<noOfSlots;a++) // For storing the slot type
     {
         slotsArray[a].slotTypeNo=rand()%3;
         strcpy(slotsArray[a].slotType,slotType[slotsArray[a].slotTypeNo]);
     }
     
-    
-    //stores the playerNumber
-    for(int a=0;a<noOfPlayers;a++)
+    for(int a=0;a<noOfplays;a++) // For storing the playNumber
     {
-        //generates a random number
         int randomNumber=rand()%noOfSlots;
         
-        //if the slot is not occupied by any player
-        //then the player is allocated to the slot
-        if(slotsArray[randomNumber].playerNo==-1)
+        if(slotsArray[randomNumber].playNo==-1) // Checking if the slot is not occupied by any play
         {
-            slotsArray[randomNumber].playerNo=a;
+            slotsArray[randomNumber].playNo=a;
         }
+        
         else
         {
-            //generating a random number
-            randomNumber=rand()%noOfSlots;
+            randomNumber=rand()%noOfSlots; // Creating a random value
             
-            //loop runs until it finds a slot position which was empty and had no player in it
-            while(!(slotsArray[randomNumber].playerNo==-1))
+            while(!(slotsArray[randomNumber].playNo==-1))
             {
-                //generating random number
                 randomNumber=rand()%noOfSlots;
-                
             }
-            
-            //stores the player in the slot
-            slotsArray[randomNumber].playerNo=a;
+
+            slotsArray[randomNumber].playNo=a; // Stores the play in slot
         }
         
     }
     
-    //call the method to start the game
-    performActions(playerArray, slotsArray, noOfPlayers, noOfSlots);
+    Gamestarting(PlayerArray, slotsArray, noOfplays, noOfSlots); // For starting the game
     
 }
 
-//method to perform the actions
-void performActions(player playerArray[],slot slotArray[],int noOfPlayers,int noOfSlots)
+void Gamestarting(play PlayerArray[],slot slotArr[],int noOfplays,int noOfSlots) // For performing actions required
 {
-    //loop which runs throught the number of players
-    //each player gets one chance
-    for(int a=0;a<noOfPlayers;a++)
+    for(int a=0;a<noOfplays;a++) // Each play gets one chance
     {
-        //boolean to store if the players turn was successful
-        //if not successful then player does his turn again
         bool turnSuccessful=false;
+    
+        printf("%s : Please do your turn\n",PlayerArray[a].name); // play's turn
         
-        //Player gets his turn
-        printf("%s : Please do your turn\n",playerArray[a].name);
+        printf("Enter 1 to attack the closest play\nEnter 2 to move to the previous slot\nEnter 3 to move to the next slot\n");
         
-        //player inputs his move
-        printf("Enter 1 to attack the closest player\nEnter 2 to move to the previous slot\nEnter 3 to move to the next slot\n");
-      int moveChoice;
-        scanf("%d",&moveChoice);
+        int moveChoice;
+        scanf("%d",&moveChoice); // plays makes his choice
         
-        //checks if the choice entered was correct
-        //if not takes an new input again
-        while(!(moveChoice>=1 && moveChoice<=3))
+        while(!(moveChoice>=1 && moveChoice<=3)) // Checking if the choice was correct
         {
             printf("Wrong Choice Entered\nRe-enter your choice: ");
             scanf("%d",&moveChoice);
         }
         
-        int playerSlotPosition=0;
+        int playSlotPosition=0;
         
-        //finds the player position in the slotArray
-        for(int j=0;j<noOfSlots;j++)
+        for(int j=0;j<noOfSlots;j++) // For finding the play position in the slotArr
         {
-            if(slotArray[j].playerNo==a)
+            if(slotArr[j].playNo==a)
             {
-                playerSlotPosition=j;
+                playSlotPosition=j;
             }
         }
         
-        //checks the move taken by the user
-        if(moveChoice==1)
+        if(moveChoice==1) // Depending on the choice
         {
-            //calls the method to return the closest player to be attacked
-            int attackedPlayerNo=findClosestPlayer(a,slotArray,noOfSlots);
+            int attackedplayNo=findClosestplay(a,slotArr,noOfSlots); // Calls the function
             
-            //calls the method to implement the attack
-            implementingAttack(playerArray, a, attackedPlayerNo);
+            Attacking(PlayerArray, a, attackedplayNo); // Now attacks the closest play
             
-            //updates the turnSuccessful
             turnSuccessful=true;
         }
-        //checks if the move is to move previous
+        
         else if(moveChoice==2)
         {
-            //checks if the previous position is possible
-            if(playerSlotPosition-1>=0)
+            if(playSlotPosition-1>=0) // Checks if the previous position is possible
             {
-                //checks if the slot has a player
-                if(slotArray[playerSlotPosition-1].playerNo==-1)
+                if(slotArr[playSlotPosition-1].playNo==-1) // Checks if the slot has a play
                 {
-                    //method to update the capabilities on moving the slot
-                    updateCapabiltitesOnMovingSlot(playerArray, a, slotArray[playerSlotPosition-1].slotTypeNo);
+                    updateCapabiltitesOnMovingSlot(PlayerArray, a, slotArr[playSlotPosition-1].slotTypeNo); // Update the capabilities
                     
-                    //updating the turnSuccessful
                     turnSuccessful=true;
                 }
+                
                 else
                 {
-                    //prints a message if the previous slot was not possible
                     printf("Unable to move to the previous slot\n");
                 }
             }
+            
             else
             {
-                //print a message if the previous slot was not possible
                 printf("Unable to move to the previous slot\n");
             }
         }
+        
         else
         {
-            //checks if the next slot is possible i.e within bounds
-            if(playerSlotPosition+1<noOfSlots)
+            if(playSlotPosition+1<noOfSlots) // If the next slot is even possible
             {
-                //checks if the next slot is empty
-                if(slotArray[playerSlotPosition+1].playerNo==-1)
+                if(slotArr[playSlotPosition+1].playNo==-1) // If slot is empty
                 {
-                    //calling the method to update the capabilities of the player
-                    updateCapabiltitesOnMovingSlot(playerArray, a, slotArray[playerSlotPosition+1].slotTypeNo);
-                    
-                    //update the turn successful
+                    updateCapabiltitesOnMovingSlot(PlayerArray, a, slotArr[playSlotPosition+1].slotTypeNo); // Calling the funtion to update the capabilities
+
                     turnSuccessful=true;
                 }
+                
                 else
                 {
-                    //print a message if the next slot is not possible
                     printf("Unable to move to the next slot\n");
                 }
             }
+
             else
             {
-                //print a message if the next slot is not possible
                 printf("Unable to move to the next slot\n");
             }
             
         }
-        
-        //if the turn was successful
+
         if(turnSuccessful)
         {
-            //calling the method to print the details
-            printDetails(playerArray, noOfPlayers);
+            Printing_Final(PlayerArray, noOfplays); // Calling the function to print
         }
         else
         {
-            //if unsuccessful then decrements the value of i
-            //player i gets another chance to make a move
-            a--;
+            a--; //Then play gets another chance
         }
         
     }
 }
-//method to find the closest player
-int findClosestPlayer(int attackerPlayerNo,slot slotArray[], int noOfSlots)
+
+int findClosestplay(int attackerplayNo,slot slotArr[], int noOfSlots) // To find the closest play
 {
-    //variables to store the attacker nd attacked player slot position
-    int attackerPlayerSlotPosition=0;
-    int attackedPlayerSlotPosition=0;
+
+    int attackerplaySlotPosition=0;
+    int attackedplaySlotPosition=0;
     
-    //loop to find the position of the attacker
-    for(int a=0;a<noOfSlots;a++)
+    for(int a=0;a<noOfSlots;a++) // To find position of attacker
     {
-        if(slotArray[a].playerNo==attackerPlayerNo)
+        if(slotArr[a].playNo==attackerplayNo)
         {
-            attackerPlayerSlotPosition=a;
+            attackerplaySlotPosition=a;
         }
     }
     
-    //boolean to store if the closest player has been found
-    bool foundClosestPlayer=false;
+    bool foundClosestplay=false;
     
-    //counter to keep a track of the varaiable
     int counter=1;
     
-    //runs loop until finds the closest enemy
-    while(foundClosestPlayer!=true)
+    while(foundClosestplay!=true) // Runs till it finds the closest enemy
     {
-        //checks if the attacker slot position has a previous or next slot
-        if(attackerPlayerSlotPosition-counter>=0 || attackerPlayerSlotPosition+counter<noOfSlots)
+        if(attackerplaySlotPosition-counter>=0 || attackerplaySlotPosition+counter<noOfSlots)
         {
-            //checks if the attacker slot position has a previous and a next slot
-            if(attackerPlayerSlotPosition-counter>=0 && attackerPlayerSlotPosition+counter<noOfSlots)
+            if(attackerplaySlotPosition-counter>=0 && attackerplaySlotPosition+counter<noOfSlots)
             {
-                //checks if both the slots has a player in it to attack
-                if((slotArray[attackerPlayerSlotPosition+counter].playerNo!=-1)&&(slotArray[attackerPlayerSlotPosition-counter].playerNo!=-1))
+                if((slotArr[attackerplaySlotPosition+counter].playNo!=-1)&&(slotArr[attackerplaySlotPosition-counter].playNo!=-1))
                 {
-                    //updates the foundClosestPlayer to true
-                    foundClosestPlayer=true;
+                    foundClosestplay=true;
                     
-                    //gives an option to the player to attack either the previous player or the next player
-                    printf("There are 2 closest slots to attack\nPress 1 to attack precious slot\nPress 2 to attack next slot\n");
                     int slotChoice;
+                    
+                    printf("There are 2 closest slots to attack\nPress 1 to attack precious slot\nPress 2 to attack next slot\n");
+                    //Asks if play want to attack the previous play or the next play
                     scanf("%d",&slotChoice);
                     
-                    //if wrong input then re enter the choice
-                    while(!(slotChoice==1 || slotChoice==2))
+                    while(!(slotChoice==1 || slotChoice==2)) // Checks if choice is correct
                     {
                         printf("Wrong Choice Entered\nRe-enter your choice: ");
                         scanf("%d",&slotChoice);
                     }
                     
-                    //checks if the user wanted option 1 to attack previous player
                     if(slotChoice==1)
                     {
-                        attackedPlayerSlotPosition=attackerPlayerSlotPosition-counter;
-                    }
-                    else{
-                        //if the user wanted to attack the next player
-                        attackedPlayerSlotPosition=attackerPlayerSlotPosition+counter;
+                        attackedplaySlotPosition=attackerplaySlotPosition-counter;
                     }
                     
-                }
-                //checks if the previous slot has a player in it
-                else if(slotArray[attackerPlayerSlotPosition-counter].playerNo!=-1)
-                {
-                    //updates the foundClosestPlayer to true
-                    foundClosestPlayer=true;
+                    else
+                    {
+                        attackedplaySlotPosition=attackerplaySlotPosition+counter;
+                    }
                     
-                    //updates the attackedPlayerSlotPosition
-                    attackedPlayerSlotPosition=attackerPlayerSlotPosition-counter;
                 }
-                else if(slotArray[attackerPlayerSlotPosition+counter].playerNo!=-1)
+                
+                else if(slotArr[attackerplaySlotPosition-counter].playNo!=-1)
+                // Checking the previous slot
                 {
-                    //updates the foundClosestPlayer to true
-                    foundClosestPlayer=true;
-                    
-                    //updates the attackedPlayerSlotPosition
-                    attackedPlayerSlotPosition=attackerPlayerSlotPosition+counter;
+                    foundClosestplay=true;
+                    attackedplaySlotPosition=attackerplaySlotPosition-counter;
+                    //updates the attackedplaySlotPosition
                 }
-            }
-            //checks if the attacker slot position has a previous slot possible
-            else if(attackerPlayerSlotPosition-counter>=0)
-            {
-                //checks if the previous slot has a player to attack
-                if(slotArray[attackerPlayerSlotPosition-counter].playerNo!=-1)
+                
+                else if(slotArr[attackerplaySlotPosition+counter].playNo!=-1)
                 {
-                    //updates the foundClosestPlayer to true
-                    foundClosestPlayer=true;
-                    
-                    //updates the attackedPlayerSlotPosition
-                    attackedPlayerSlotPosition=attackerPlayerSlotPosition-counter;
+                    foundClosestplay=true;
+                    attackedplaySlotPosition=attackerplaySlotPosition+counter;
+                    //updates the attackedplaySlotPosition
                 }
             }
-            //checks if the attacker slot position has a next slot possible
-            else if(attackerPlayerSlotPosition+counter<noOfSlots)
+            
+            else if(attackerplaySlotPosition-counter>=0)
             {
-                //checks if the next slot has a player in it to attack
-                if(slotArray[attackerPlayerSlotPosition+counter].playerNo!=-1)
+                
+                if(slotArr[attackerplaySlotPosition-counter].playNo!=-1)
                 {
-                    //updates the foundClosestPlayer to true
-                    foundClosestPlayer=true;
-                    
-                    //updates the attackedPlayerSlotPosition
-                    attackedPlayerSlotPosition=attackerPlayerSlotPosition+counter;
+                    foundClosestplay=true;
+                    attackedplaySlotPosition=attackerplaySlotPosition-counter;
+                }
+            }
+            
+            else if(attackerplaySlotPosition+counter<noOfSlots)
+            {
+                if(slotArr[attackerplaySlotPosition+counter].playNo!=-1)
+                {
+                    foundClosestplay=true; // Updates it to be true
+
+                    attackedplaySlotPosition=attackerplaySlotPosition+counter;
                 }
             }
         }
-        //increments the counter
-        counter++;
+        
+        counter++; // Incrementing the counter
     }
-    return slotArray[attackedPlayerSlotPosition].playerNo;
-}
-
-//method to print the details of the player
-void printDetails(player playerArray[],int noOfPlayers)
-{
-    //loop to print all the player details
-    for(int a=0;a<noOfPlayers;a++)
-    {
-        //prints the player  name, type and life points
-        printf("%s\t(%s, %d)\n",playerArray[a].name,playerArray[a].type,playerArray[a].lifePoints);
-    }
-}
-
-//method to set the capabilities of the players
-void setCapabilities(player playerArray[],int playerNumber,int playerTypeChoice)
-{
-    //updates the life points of the player
-    playerArray[playerNumber].lifePoints=100;
-    srand((unsigned int)time(NULL));
     
-    //checks if the is a Elf
-    if(playerTypeChoice==1)
+    return slotArr[attackedplaySlotPosition].playNo; // Exiting the void
+}
+
+void Printing_Final(play PlayerArray[],int noOfplays) // For printing
+{
+    for(int a=0;a<noOfplays;a++)
     {
-        //magic skills greater than 50 and less than 80
-        playerArray[playerNumber].magicSkills=51+(rand()%29);
+        printf("%s\t(%s, %d)\n",PlayerArray[a].name,PlayerArray[a].type,PlayerArray[a].lifePoints);
+        // For printing the player's name, type and life points
+    }
+}
+
+void to_set_Capabilities(play PlayerArray[],int playNumber,int playTypeChoice)
+{
+    PlayerArray[playNumber].lifePoints=100; // Initializes life-points to 100
+    srand((unsigned int)time(NULL)); // Using srand to successfully generate random
+
+    if(playTypeChoice==1) // If elf
+    {
+        PlayerArray[playNumber].magicSkills=51+(rand()%29); // Creates random between 50 and 80
         
-        //smartness greater than 70 and less than 100
-        playerArray[playerNumber].smartness=70+(rand()%31);
+        PlayerArray[playNumber].smartness=70+(rand()%31); // Creates random between 70 and 100
         
-        //luck greater than 60 and less than 100
-        playerArray[playerNumber].luck=60+(rand()%41);
+        PlayerArray[playNumber].luck=60+(rand()%41); // Creates random between 60 and 100
         
-        //dexerity greater than 0 and less than equal to 100
-        playerArray[playerNumber].dexterity=1+(rand()%100);
+        PlayerArray[playNumber].dexterity=1+(rand()%100); // Creates random between 0 and 100
         
-        //strength greater than 0 and less than equal to 50
-        playerArray[playerNumber].strength=1+(rand()%50);
+        PlayerArray[playNumber].strength=1+(rand()%50); // Creates random between 0 and 50
         
     }
     
-    //checks if the player is a Human
-    else if(playerTypeChoice==2)
+    else if(playTypeChoice==2) // If human
     {
-        //magic skills greater than 0 and less than 100
-        playerArray[playerNumber].magicSkills=1+(rand()%100);
+        PlayerArray[playNumber].magicSkills=1+(rand()%100); // Creates random between 0 and 100
         
-        //smartness greater than 0 and less than 100
-        playerArray[playerNumber].smartness=1+(rand()%100);
+        PlayerArray[playNumber].smartness=1+(rand()%100); // Creates random between 0 and 100
         
-        //luck greater than 0 and less than 100
-        playerArray[playerNumber].luck=1+(rand()%100);
+        PlayerArray[playNumber].luck=1+(rand()%100); // Creates random between 0 and 1000
+
+        PlayerArray[playNumber].dexterity=1+(rand()%100); // Creates random between 0 and 100
+
+        PlayerArray[playNumber].strength=1+(rand()%100); // Creates random between 0 and 100
         
-        //dexerity greater than 0 and less than 100
-        playerArray[playerNumber].dexterity=1+(rand()%100);
-        
-        //strength greater than 0 and less than 100
-        playerArray[playerNumber].strength=1+(rand()%100);
-        
-        //loop runs until the sum of all the capabilties is less than 300
-        while((playerArray[playerNumber].luck+playerArray[playerNumber].magicSkills+playerArray[playerNumber].smartness+playerArray[playerNumber].strength+playerArray[playerNumber].dexterity)>=300)
+
+        while((PlayerArray[playNumber].luck+PlayerArray[playNumber].magicSkills+PlayerArray[playNumber].smartness+PlayerArray[playNumber].strength+PlayerArray[playNumber].dexterity)>=300)
         {
-            //magic skills greater than 0 and less than 100
-            playerArray[playerNumber].magicSkills=1+(rand()%100);
+            PlayerArray[playNumber].magicSkills=1+(rand()%100); // Creates random between 0 and 100
             
-            //smartness greater than 0 and less than 100
-            playerArray[playerNumber].smartness=1+(rand()%100);
+            PlayerArray[playNumber].smartness=1+(rand()%100); // Creates random between 0 and 100
             
-            //luck greater than 0 and less than 100
-            playerArray[playerNumber].luck=1+(rand()%100);
+            PlayerArray[playNumber].luck=1+(rand()%100); // Creates random between 0 and 100
             
-            //dexertity greater than 0 and less than 100
-            playerArray[playerNumber].dexterity=1+(rand()%100);
+            PlayerArray[playNumber].dexterity=1+(rand()%100); // Creates random between 0 and 100
             
-            //strength greater than 0 and less than 100
-            playerArray[playerNumber].strength=1+(rand()%100);
+            PlayerArray[playNumber].strength=1+(rand()%100); // Creates random between 0 and 100
         }
     }
-    //checks if player is a Orge
-    else if(playerTypeChoice==3)
+
+    else if(playTypeChoice==3) // If orge
     {
-        //magicSkills equal to zero
-        playerArray[playerNumber].magicSkills=0;
+        PlayerArray[playNumber].magicSkills=0; // Initializing it to 0
         
-        //smartness greater than 0 and less than 20
-        playerArray[playerNumber].smartness=rand()%21;
-        
-        //luck such that the sum of luck and smartness is less than 50
-        playerArray[playerNumber].luck=(rand()%(50-playerArray[playerNumber].smartness));
-        
-        //dexerity greater than 80 and less than 100
-        playerArray[playerNumber].dexterity=80+(rand()%21);
-        
-        //strength greater than 80 and less than 100
-        playerArray[playerNumber].strength=80+(rand()%21);
+
+        PlayerArray[playNumber].smartness=rand()%21; // Creates random between 0 and 20
+
+        PlayerArray[playNumber].luck=(rand()%(50-PlayerArray[playNumber].smartness)); // Creates random between 0 and 50
+
+        PlayerArray[playNumber].dexterity=80+(rand()%21); // Creates random between 80 and 100
+
+        PlayerArray[playNumber].strength=80+(rand()%21); // Creates random between 80 and 100
     }
-    else
+    
+    else // If wizard
     {
-        //if the player is a wizard
+        PlayerArray[playNumber].magicSkills=80+(rand()%21); // Creates random between 80 and 100
+
+        PlayerArray[playNumber].smartness=90+(rand()%11); // Creates random between 90 and 100
+
+        PlayerArray[playNumber].luck=50+(rand()%51); // Creates random between 50 and 100
+
+        PlayerArray[playNumber].dexterity=1+(rand()%100); // Creates random between 0 and 100
+
+        PlayerArray[playNumber].strength=1+(rand()%20); // Creates random between 0 and 20
+    }
+}
+
+void updateCapabiltitesOnMovingSlot(play PlayerArray[],int playNumber,int slotTypeMovedTo)
+{
+    if(slotTypeMovedTo==1) // If player moved to a hill
+    {
+        if(PlayerArray[playNumber].dexterity<50) // If dexterity is less than 50
+        {
+            PlayerArray[playNumber].strength-=10;
+        }
         
-        //magicSkills greater than 80 and less than 100
-        playerArray[playerNumber].magicSkills=80+(rand()%21);
+        else if(PlayerArray[playNumber].dexterity>=60) // If dexerity is greater than 60
+        {
+            PlayerArray[playNumber].strength+=10;
+        }
+    }
+    
+    else if(slotTypeMovedTo==2) // If player moved to a city
+    {
+        if(PlayerArray[playNumber].smartness>60) // If smartness is greater than 60
+        {
+            PlayerArray[playNumber].magicSkills+=10;
+        }
         
-        //smartness greater than 90 and less than 100
-        playerArray[playerNumber].smartness=90+(rand()%11);
+        else if(PlayerArray[playNumber].smartness<=50) // If smartness is less than 50
+        {
+            PlayerArray[playNumber].dexterity-=10;
+        }
         
-        //luck greater than 50 and less than 100
-        playerArray[playerNumber].luck=50+(rand()%51);
-        
-        //dexerity greater than 0 and less than 100
-        playerArray[playerNumber].dexterity=1+(rand()%100);
-        
-        //strength greater than 0 and less than 20
-        playerArray[playerNumber].strength=1+(rand()%20);
+    }
+}
+
+void Attacking(play PlayerArray[],int attackerplayNo,int attackedplayNo) // For attacking
+{
+   
+    if(PlayerArray[attackedplayNo].strength<=70) // If the attacked player strength is less than 70
+    {
+        PlayerArray[attackedplayNo].lifePoints=PlayerArray[attackedplayNo].lifePoints-(0.5*PlayerArray[attackedplayNo].strength);
+    }
+    
+    else //updates the lifePoints of the attacker play
+    {
+        PlayerArray[attackerplayNo].lifePoints=PlayerArray[attackerplayNo].lifePoints-(0.3*PlayerArray[attackedplayNo].strength);
     }
 }
